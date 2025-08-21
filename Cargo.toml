@@ -1,0 +1,31 @@
+[package]
+name = "boop_counter"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+env_logger = "0.11.6"
+lazy_static = "1.5.0"
+oyasumivr_oscquery = { git = "https://github.com/Toys0125/oyasumivr_oscquery.git", branch = "Rust-OSCQuery" }
+rosc = "0.10.1"
+tokio = { version = "1.35.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = {version = "0.12.12", features = ["blocking"] }
+json-pointer = "0.3.4"
+log = "0.4.26"
+chrono = "0.4.41"
+dirs = "6.0.0"
+dotenv = "0.15.0"
+eframe = "0.31.1"
+strum = "0.27.1"
+strum_macros = "0.27.1"
+
+[package.metadata.bundle]
+name = "Boop Counter OSCQuery"
+identifier = "pw.toysland.boop_counter"
+resources = [
+    "lib/*"
+]
