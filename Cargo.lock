@@ -3,6 +3,28 @@
 version = 4
 
 [[package]]
+name = "Pregnancy-OSCQuery"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "dirs",
+ "dotenv",
+ "eframe",
+ "env_logger",
+ "json-pointer",
+ "lazy_static",
+ "log",
+ "oyasumivr_oscquery",
+ "reqwest",
+ "rosc",
+ "serde",
+ "serde_json",
+ "strum 0.27.1",
+ "strum_macros 0.27.1",
+ "tokio",
+]
+
+[[package]]
 name = "ab_glyph"
 version = "0.2.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -579,28 +601,6 @@ dependencies = [
  "futures-io",
  "futures-lite",
  "piper",
-]
-
-[[package]]
-name = "boop_counter"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "dirs",
- "dotenv",
- "eframe",
- "env_logger",
- "json-pointer",
- "lazy_static",
- "log",
- "oyasumivr_oscquery",
- "reqwest",
- "rosc",
- "serde",
- "serde_json",
- "strum 0.27.1",
- "strum_macros 0.27.1",
- "tokio",
 ]
 
 [[package]]
