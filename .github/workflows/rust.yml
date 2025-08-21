@@ -2,8 +2,7 @@ name: Release Rust Binaries
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -19,61 +18,73 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Get version from Cargo.toml
-        id: cargo_version
+      # Works on BOTH Ubuntu and Windows
+      - name: Get package name and version from Cargo.toml
+        id: cargo_meta
+        shell: pwsh
         run: |
-          VERSION=$(grep '^version =' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          $content = Get-Content Cargo.toml -Raw
+          # Only look inside the [package] section
+          $pkg = [regex]::Match($content, '(?ms)^\s*\[package\]\s*(.*?)^\s*\[', 'Multiline').Value
+          if (-not $pkg) { $pkg = [regex]::Match($content, '(?ms)^\s*\[package\]\s*(.*)$').Value }
+          if ($pkg -match 'name\s*=\s*"(.*?)"')    { $name = $Matches[1] }    else { throw "name not found" }
+          if ($pkg -match 'version\s*=\s*"(.*?)"') { $ver  = $Matches[1] }    else { throw "version not found" }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "name=$name"
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$ver"
 
-      - name: Build binary
+      - name: Build (release)
         run: cargo build --release
 
-      - name: Rename artifact
+      - name: Package artifact
+        shell: pwsh
         run: |
-          mkdir artifacts
-          BINARY_NAME=$(basename $(pwd))
-          if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cp target/release/${BINARY_NAME}.exe artifacts/${BINARY_NAME}-windows.exe
-          else
-            cp target/release/${BINARY_NAME} artifacts/${BINARY_NAME}-linux
-          fi
-        shell: bash
+          $NAME    = '${{ steps.cargo_meta.outputs.name }}'
+          $VERSION = '${{ steps.cargo_meta.outputs.version }}'
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          if ($IsWindows) {
+            Copy-Item "target/release/$NAME.exe" "artifacts/$NAME-$VERSION-windows.exe"
+          } else {
+            Copy-Item "target/release/$NAME" "artifacts/$NAME-$VERSION-linux"
+          }
 
-      - name: Upload artifact for workflow
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-binaries-${{ matrix.os }}
+          name: ${{ matrix.os }}-binary
           path: artifacts/*
 
   release:
-    name: Create Release
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Read version once more (same cross-platform step; here it'll run on Ubuntu)
       - name: Get version from Cargo.toml
-        id: cargo_version
+        id: cargo_meta
+        shell: pwsh
         run: |
-          VERSION=$(grep '^version =' Cargo.toml | sed -E 's/version = "(.*)"/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          $content = Get-Content Cargo.toml -Raw
+          $pkg = [regex]::Match($content, '(?ms)^\s*\[package\]\s*(.*?)^\s*\[', 'Multiline').Value
+          if (-not $pkg) { $pkg = [regex]::Match($content, '(?ms)^\s*\[package\]\s*(.*)$').Value }
+          if ($pkg -match 'version\s*=\s*"(.*?)"') { $ver  = $Matches[1] }    else { throw "version not found" }
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$ver"
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+          merge-multiple: true
 
-      - name: Create Release
+      - name: Create/Update Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.cargo_version.outputs.version }}
-          name: Release v${{ steps.cargo_version.outputs.version }}
-          files: artifacts/**/*
+          tag_name: v${{ steps.cargo_meta.outputs.version }}
+          name: Release v${{ steps.cargo_meta.outputs.version }}
+          files: artifacts/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
