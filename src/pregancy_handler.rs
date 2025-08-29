@@ -354,6 +354,7 @@ fn set_child_count(value: u8) {
     if let Some(ref mut childdata) = *lock {
         childdata.number_of_childern = value;
     }
+    OscServer::send_osc_data("/avatar/parameters/ChildCount".to_string(), vec![OscType::Int(value.into())]);
 }
 fn get_conception_time() -> Option<DateTime<Local>> {
     let childdata: ChildInfo = get_child_data().unwrap_or_default();
@@ -543,65 +544,65 @@ impl EguiApp for PregUI {
 
                     //ui.label(format!("Gestation Time: {:.2}", child.gestation_time));
                 }
-                    ui.horizontal(|ui| {
-                        ui.label("Gestation Type:");
-                        egui::ComboBox::new("Gestation", "")
-                            .selected_text(child.gestation.to_string())
-                            .show_ui(ui, |ui| {
-                                for ty in GestationType::iter() {
-                                    if ui
-                                        .selectable_label(child.gestation == ty, ty.to_string())
-                                        .clicked()
-                                    {
-                                        let new_time = child.gestation.seconds_per_unit() as f64
-                                            * child.gestation_time as f64
-                                            / ty.seconds_per_unit() as f64;
-                                        set_gestation_time(new_time as f32);
-                                        set_gestation_type(ty as u8);
-                                    }
+                ui.horizontal(|ui| {
+                    ui.label("Gestation Type:");
+                    egui::ComboBox::new("Gestation", "")
+                        .selected_text(child.gestation.to_string())
+                        .show_ui(ui, |ui| {
+                            for ty in GestationType::iter() {
+                                if ui
+                                    .selectable_label(child.gestation == ty, ty.to_string())
+                                    .clicked()
+                                {
+                                    let new_time = child.gestation.seconds_per_unit() as f64
+                                        * child.gestation_time as f64
+                                        / ty.seconds_per_unit() as f64;
+                                    set_gestation_time(new_time as f32);
+                                    set_gestation_type(ty as u8);
                                 }
-                            });
-                    });
-                    //Gestation Time
-                    ui.horizontal(|ui| {
-                        ui.label("Gestation Time:");
-
-                        // === DragValue (syncs with gestation_time) ===
-                        let mut temp_value = child.gestation_time;
-                        let gestation_response = ui.add(
-                            egui::DragValue::new(&mut temp_value)
-                                .range(0.01..=f32::INFINITY)
-                                .speed(0.1)
-                                .suffix(&format!(" {}", child.gestation.to_string())),
-                        );
-
-                        if gestation_response.changed() {
-                            set_gestation_time(temp_value);
-                            save_data().unwrap();
-                        }
-                        /* // === Text input ===
-                        let text_response = ui.add_sized(
-                            [80.0, 20.0],
-                            egui::TextEdit::singleline(&mut self.gestation_time_input),
-                        );
-                        if text_response.lost_focus()
-                            && ui.input(|i| {
-                                i.key_pressed(egui::Key::Enter) || i.pointer.any_released()
-                            })
-                        {
-                            if let Ok(parsed) = self.gestation_time_input.trim().parse::<f32>() {
-                                if parsed > 0.0 {
-                                    set_gestation_time(parsed);
-                                    save_data().unwrap();
-                                } else {
-                                    println!("Value must be > 0");
-                                }
-                            } else {
-                                println!("Invalid float input");
                             }
-                        } */
-                    });
-                    ui.label(format!("Child Count: {}", child.number_of_childern));
+                        });
+                });
+                //Gestation Time
+                ui.horizontal(|ui| {
+                    ui.label("Gestation Time:");
+
+                    // === DragValue (syncs with gestation_time) ===
+                    let mut temp_value = child.gestation_time;
+                    let gestation_response = ui.add(
+                        egui::DragValue::new(&mut temp_value)
+                            .range(0.01..=f32::INFINITY)
+                            .speed(0.1)
+                            .suffix(&format!(" {}", child.gestation.to_string())),
+                    );
+
+                    if gestation_response.changed() {
+                        set_gestation_time(temp_value);
+                        save_data().unwrap();
+                    }
+                    /* // === Text input ===
+                    let text_response = ui.add_sized(
+                        [80.0, 20.0],
+                        egui::TextEdit::singleline(&mut self.gestation_time_input),
+                    );
+                    if text_response.lost_focus()
+                        && ui.input(|i| {
+                            i.key_pressed(egui::Key::Enter) || i.pointer.any_released()
+                        })
+                    {
+                        if let Ok(parsed) = self.gestation_time_input.trim().parse::<f32>() {
+                            if parsed > 0.0 {
+                                set_gestation_time(parsed);
+                                save_data().unwrap();
+                            } else {
+                                println!("Value must be > 0");
+                            }
+                        } else {
+                            println!("Invalid float input");
+                        }
+                    } */
+                });
+                ui.label(format!("Child Count: {}", child.number_of_childern));
                 ui.horizontal(|ui| {
                     // Handlers
                     if ui.button("Add Child").clicked() || ctx.input(|i| i.key_pressed(Key::Plus)) {
