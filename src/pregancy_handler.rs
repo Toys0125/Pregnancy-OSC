@@ -522,6 +522,7 @@ impl EguiApp for PregUI {
                     } else {
                         "N/A".into()
                     };
+                    
                     ui.horizontal(|ui| {
                         ui.label(format!(
                             "Estimated Date: {} Remaining Time: {}",
@@ -533,8 +534,15 @@ impl EguiApp for PregUI {
                             save_data().unwrap();
                         }
                     });
+                    ui.horizontal(|ui| {
+                        ui.label(format!("Gestation Progress:"));
+                        ui.add(egui::ProgressBar::new(progress as f32)
+                            .text(format!("{:.1}%", progress * 100.0)).show_percentage().animate(false));
+                    });
+                    
 
-                    ui.label(format!("Gestation Progress: {:.1}%", progress * 100.0));
+                    //ui.label(format!("Gestation Time: {:.2}", child.gestation_time));
+                }
                     ui.horizontal(|ui| {
                         ui.label("Gestation Type:");
                         egui::ComboBox::new("Gestation", "")
@@ -554,8 +562,6 @@ impl EguiApp for PregUI {
                                 }
                             });
                     });
-
-                    //ui.label(format!("Gestation Type: {:?}", child.gestation));
                     //Gestation Time
                     ui.horizontal(|ui| {
                         ui.label("Gestation Time:");
@@ -595,12 +601,7 @@ impl EguiApp for PregUI {
                             }
                         } */
                     });
-                    //ui.label(format!("Gestation Time: {:.2}", child.gestation_time));
                     ui.label(format!("Child Count: {}", child.number_of_childern));
-                } else {
-                    ui.label(format!("Gestation Type: {:?}", child.gestation));
-                    ui.label(format!("Gestation Time: {:.2}", child.gestation_time));
-                }
                 ui.horizontal(|ui| {
                     // Handlers
                     if ui.button("Add Child").clicked() || ctx.input(|i| i.key_pressed(Key::Plus)) {
