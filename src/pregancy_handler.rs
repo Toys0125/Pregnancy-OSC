@@ -499,7 +499,7 @@ impl EguiApp for PregUI {
         let active = get_system_active().unwrap_or(false);
         let avatar_id = get_osc_query_cache()
             .get_avatar_id()
-            .unwrap_or_default()
+            .unwrap()
             .unwrap_or("Unknown".to_string());
 
         egui::CentralPanel::default().show(ctx, |ui| {

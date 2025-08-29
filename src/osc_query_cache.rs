@@ -41,7 +41,7 @@ impl OscQueryCache {
         }
         let url = match OscServer::get_osc_query() {
             Some(base_url) => format!("{}/avatar/change", base_url),
-            None => return Ok(Some(String::new())),
+            None => return Ok(None),
         };
         let response = reqwest::blocking::get(&url)?.text()?;
         log::debug!("Avatar data is{}",response);
