@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'boop_counter'",
+            "name": "Debug executable 'Pregnancy-OSC'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=boop_counter",
-                    "--package=boop_counter"
+                    "--bin=Pregnancy-OSC",
+                    "--package=Pregnancy-OSC"
                 ],
                 "filter": {
-                    "name": "boop_counter",
+                    "name": "Pregnancy-OSC",
                     "kind": "bin"
                 }
             },
@@ -23,22 +23,22 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "RUST_BACKTRACE": "1",
-                "RUST_LOG":"Debug"
+                "RUST_LOG":"Debug,vrchat_osc=warn,tracing::span=warn"
             }
         },
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'boop_counter'",
+            "name": "Debug unit tests in executable 'Pregnancy-OSC'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=boop_counter",
-                    "--package=boop_counter"
+                    "--bin=Pregnancy-OSC",
+                    "--package=Pregnancy-OSC"
                 ],
                 "filter": {
-                    "name": "boop_counter",
+                    "name": "Pregnancy-OSC",
                     "kind": "bin"
                 }
             },

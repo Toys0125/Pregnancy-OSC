@@ -202,14 +202,11 @@ impl PacketHandler for PregancyHandler {
         // Spawn UI in separate thread
         std::thread::spawn(move || loop {
             if get_system_active().unwrap() {
-                // log::debug!("Running Check for pregancy");
                 if get_child_count() > 0 {
-                    let packet = rosc::encoder::encode(&OscPacket::Message(rosc::OscMessage {
-                        addr: "/avatar/parameters/PregnancySave".to_string(),
-                        args: vec![OscType::Float(get_gestation_progress_fraction() as f32)],
-                    }))
-                    .unwrap();
-                    OscServer::send_osc_data(&packet);
+                    OscServer::send_osc_data(
+                        "/avatar/parameters/PregnancySave".to_string(),
+                        vec![OscType::Float(get_gestation_progress_fraction() as f32)],
+                    );
                     log::debug!(
                         "Current Pregnacy Progress is {}",
                         get_gestation_progress_fraction()
@@ -220,6 +217,7 @@ impl PacketHandler for PregancyHandler {
                 std::thread::sleep(std::time::Duration::from_secs(5));
             }
         });
+        check_avatar_oscquery().unwrap();
     }
 }
 fn check_avatar_oscquery() -> Result<(), Box<dyn std::error::Error>> {
@@ -247,32 +245,28 @@ fn check_avatar_oscquery() -> Result<(), Box<dyn std::error::Error>> {
                 }),
         );
         set_system_active(true);
-        let mut packet = rosc::encoder::encode(&OscPacket::Message(rosc::OscMessage {
-            addr: "/avatar/parameters/GestationTime".to_string(),
-            args: vec![OscType::Float(get_gestation_time().into())],
-        }))
-        .unwrap();
-        OscServer::send_osc_data(&packet);
-        packet = rosc::encoder::encode(&OscPacket::Message(rosc::OscMessage {
-            addr: "/avatar/parameters/Gestation".to_string(),
-            args: vec![OscType::Int(get_gestation_type().into())],
-        }))
-        .unwrap();
-        OscServer::send_osc_data(&packet);
+        // Extract all needed data before spawning the async block to avoid holding MutexGuard across await.
+        let gestation_time = get_gestation_time();
+        let gestation_type = get_gestation_type();
         let child_count = get_child_count();
+        OscServer::send_osc_data(
+            "/avatar/parameters/GestationTime".to_string(),
+            vec![OscType::Float(gestation_time.into())],
+        );
+        OscServer::send_osc_data(
+            "/avatar/parameters/Gestation".to_string(),
+            vec![OscType::Int(gestation_type.into())],
+        );
         if child_count > 0 {
-            packet = rosc::encoder::encode(&OscPacket::Message(rosc::OscMessage {
-                addr: "/avatar/parameters/ChildCount".to_string(),
-                args: vec![OscType::Int(get_child_count().into())],
-            }))
-            .unwrap();
-            OscServer::send_osc_data(&packet);
-            packet = rosc::encoder::encode(&OscPacket::Message(rosc::OscMessage {
-                addr: "/avatar/parameters/IsPregnant".to_string(),
-                args: vec![OscType::Bool(true)],
-            }))
-            .unwrap();
-            OscServer::send_osc_data(&packet);
+            OscServer::send_osc_data(
+                "/avatar/parameters/ChildCount".to_string(),
+                vec![OscType::Int(child_count.into())],
+            );
+
+            OscServer::send_osc_data(
+                "/avatar/parameters/IsPregnant".to_string(),
+                vec![OscType::Bool(true)],
+            );
         }
 
         save_data_writer(&data)?;

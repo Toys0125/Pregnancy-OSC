@@ -1,6 +1,6 @@
 [package]
-name = "Pregnancy-OSCQuery"
-version = "0.1.1"
+name = "Pregnancy-OSC"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,8 +8,7 @@ edition = "2021"
 [dependencies]
 env_logger = "0.11.6"
 lazy_static = "1.5.0"
-oyasumivr_oscquery = { git = "https://github.com/Toys0125/oyasumivr_oscquery.git", branch = "Rust-OSCQuery" }
-rosc = "0.10.1"
+rosc = "0.11"
 tokio = { version = "1.35.0", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -22,10 +21,5 @@ dotenv = "0.15.0"
 eframe = "0.31.1"
 strum = "0.27.1"
 strum_macros = "0.27.1"
-
-[package.metadata.bundle]
-name = "Boop Counter OSCQuery"
-identifier = "pw.toysland.boop_counter"
-resources = [
-    "lib/*"
-]
+local-ip-address = "0.6.5"
+vrchat_osc = "1.2.0"
