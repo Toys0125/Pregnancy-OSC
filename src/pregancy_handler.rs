@@ -498,10 +498,10 @@ impl EguiApp for PregUI {
 
         let child_data = get_child_data();
         let active = get_system_active().unwrap_or(false);
-        let avatar_id = get_osc_query_cache()
-            .get_avatar_id()
-            .unwrap()
-            .unwrap_or("Unknown".to_string());
+        let avatar_id = match get_osc_query_cache().get_avatar_id() {
+            Ok(Some(id)) => id,
+            _ => "Unknown".to_string(),
+        };
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Pregnancy Monitor");

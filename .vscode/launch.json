@@ -23,7 +23,7 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "RUST_BACKTRACE": "1",
-                "RUST_LOG":"Debug,vrchat_osc=warn,tracing::span=warn"
+                "RUST_LOG":"Debug,vrchat_osc=debug,tracing::span=warn"
             }
         },
         {
