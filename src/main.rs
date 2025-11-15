@@ -10,15 +10,18 @@ use dotenv::dotenv;
 
 use log::info;
 use std::sync::Arc;
-use vrchat_osc::{Error, VRChatOSC};
+use vrchat_osc::{Error};
 mod utils;
 
 
 fn main() -> eframe::Result<()> {
     // Spawn async OSC setup in a separate thread
     std::thread::spawn(|| {
-        let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-        let _ = rt.block_on(async_main());
+        let _ = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async_main());
     });
 
     // Launch UI on the main thread
@@ -33,7 +36,6 @@ fn main() -> eframe::Result<()> {
 
     eframe::run_native("Pregnancy Monitor", options, Box::new(|_cc| Ok(Box::new(PregUI::new(_cc)))))
 }
-#[allow(unused_variables)]
 async fn async_main() -> Result<(), Error> {
     dotenv().ok();
     if env::var("RUST_LOG").is_err() {
@@ -46,7 +48,6 @@ async fn async_main() -> Result<(), Error> {
         .unwrap_or(true);
     let handlers: Vec<Arc<dyn PacketHandler>> = vec![Arc::new(PregancyHandler)];
     if osc_query_enabled {
-        let vrchat_osc_instace = VRChatOSC::new().await?;
         OscServer::packet_handler(handlers).await;
         info!("OSCQuery Enabled and started.");
     } else {
@@ -69,7 +70,7 @@ async fn async_main() -> Result<(), Error> {
             .expect("vrc_port must be a valid u16");
         OscServer::set_vrc_address(vrc_osc, vrc_port);
     }
-    loop {
-        tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
-    }
+    tokio::signal::ctrl_c().await?;
+
+    Ok(())
 }
